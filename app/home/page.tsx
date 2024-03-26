@@ -16,6 +16,7 @@ const Homepage = () => {
   }
 
   async function createInvoice(formData: FormData) {
+    setIsLoading(true);
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_BASEURL}/demo`, {
         method: "POST", // *GET, POST, PUT, DELETE, etc.
@@ -35,6 +36,7 @@ const Homepage = () => {
     } catch (error) {
       console.error(error);
     }
+    setIsLoading(false);
   }
   return (
     <div className="min-h-[60vh] flex justify-center flex-col gap-20 w-full items-center ">
