@@ -5,11 +5,21 @@ import { Input } from "@/components/ui/input";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+
+export interface ApiResponse {
+  gemini: string | undefined;
+  openai: string | undefined;
+}
+
 const Homepage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { isLoaded, userId, sessionId, getToken } = useAuth();
   const router = useRouter();
   const { isSignedIn, user } = useUser();
+  const [apiResponse, setapiResponse] = useState<ApiResponse>({
+    gemini: undefined,
+    openai: undefined,
+  });
 
   if (!isLoaded || !userId) {
     router.prefetch("/");
@@ -18,26 +28,41 @@ const Homepage = () => {
   async function createInvoice(formData: FormData) {
     setIsLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASEURL}/demo`, {
-        method: "POST", // *GET, POST, PUT, DELETE, etc.
+      const response = await fetch(
+        // `${process.env.NEXT_PUBLIC_BASEURL}/ai-response`,
+        `${process.env.NEXT_PUBLIC_BASEURL}/demo`,
+        {
+          method: "POST", // *GET, POST, PUT, DELETE, etc.
 
-        cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+          cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
 
-        headers: {
-          "Content-Type": "application/json",
-          "user-email": user?.emailAddresses[0].emailAddress!,
-          "user-id": userId!,
-          // 'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: JSON.stringify({ url: formData.get("url") }), // body data type must match "Content-Type" header
-      });
+          headers: {
+            "Content-Type": "application/json",
+            "user-email": user?.emailAddresses[0].emailAddress!,
+            "user-id": userId!,
+            // 'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: JSON.stringify({ prompt: formData.get("url") }), // body data type must match "Content-Type" header
+        }
+      );
       const data = await response.json();
-      console.log(data);
+      if (data.limit !== true) {
+        setapiResponse(data);
+      } else {
+        setapiResponse({ gemini: data.message, openai: data.message });
+      }
+
+      setIsLoading(false);
     } catch (error) {
+      setapiResponse({
+        gemini: "Error in API check logs",
+        openai: "Error in API check logs",
+      });
       console.error(error);
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }
+
   return (
     <div className="min-h-[60vh] flex justify-center flex-col gap-20 w-full items-center ">
       <section className=" w-[70%] ">
@@ -52,19 +77,21 @@ const Homepage = () => {
             name="url"
             placeholder="Enter URL"
           />
-          <Button type="submit">Summarize</Button>
+          <Button onClick={() => setIsLoading(true)} type="submit">
+            Summarize
+          </Button>
         </form>
       </section>
       <section className="flex lg:flex-row flex-col gap-7 w-full ">
         <DescriptionContainer
           loading={isLoading}
-          data={undefined}
+          data={apiResponse.gemini}
           theme="blue"
           title="Gemini Pro"
         />
         <DescriptionContainer
           loading={isLoading}
-          data={undefined}
+          data={apiResponse.openai}
           theme="green"
           title="Chat GPT"
         />

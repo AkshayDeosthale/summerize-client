@@ -1,5 +1,7 @@
+"use client";
 import React from "react";
 import { SkeletonCard } from "./SkeletonCard";
+import Markdown from "react-markdown";
 
 type Props = {
   title: string;
@@ -11,7 +13,7 @@ type Props = {
 const DescriptionContainer = ({ data, title, theme, loading }: Props) => {
   return (
     <div
-      className={`min-h-[300px] w-full border ${
+      className={`min-h-[300px] w-full lg:max-w-[50%]  border ${
         theme === "blue" ? "border-blue-500" : "border-green-500"
       } rounded-lg`}
     >
@@ -26,7 +28,9 @@ const DescriptionContainer = ({ data, title, theme, loading }: Props) => {
         {loading ? (
           <SkeletonCard />
         ) : (
-          <>{data || "Enter URL to generate summary."}</>
+          <Markdown className="">
+            {data || "Enter URL to generate summary."}
+          </Markdown>
         )}
       </div>
     </div>
