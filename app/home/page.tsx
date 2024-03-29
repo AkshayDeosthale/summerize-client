@@ -30,7 +30,7 @@ const Homepage = () => {
     try {
       const response = await fetch(
         // `${process.env.NEXT_PUBLIC_BASEURL}/ai-response`,
-        `${process.env.NEXT_PUBLIC_BASEURL}/demo`,
+        `${process.env.NEXT_PUBLIC_BASEURL}/ai-response`,
         {
           method: "POST", // *GET, POST, PUT, DELETE, etc.
 
